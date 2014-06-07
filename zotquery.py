@@ -1165,11 +1165,14 @@ class ZotAction(object):
         if self.prefs['csl'] == 'odt-scannable-cites':
             self._export_scannable_cite()
         else:
-            zot = zotero.Zotero(self.settings['user_id'], 
-                                self.settings['type'], 
-                                self.settings['api_key'])
-            ref = zot.item(item_id, content='citation', style=self.prefs['csl'])
-            uref = unify(ref[0][6:-7])
+            # replace API calls - we just need first author, year, and key.
+            # output format is static here, but that is okay for us.
+            name, date = [[i['creators'][0]['family'],i['data']['date']] for i in self.data if i['key'] == item_id][0]
+            uref = "{0}.{1}.{2}".format(
+                name.lower(),
+                date,
+                item_id
+            )
 
             if self.prefs['format'] == 'Markdown':
                 citation = self._export_markdown(uref, 'ref')
